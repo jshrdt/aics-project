@@ -6,7 +6,7 @@ GitHub setup; report template/basic notes, dataset references.
 - get/load dataset (Class CIFAKE; sep train/test data, shuffle), batcher  
 - start setting up code from tutorial  
 
-TBD: input transform; label encode?
+TBD: input transform; label encode? - done
 
 ### Dec12:  
 - iterator for batches, filename to normalised tensor transform, label 0/1 encoding. 
@@ -22,6 +22,7 @@ labels: 0 - FAKE, 1 - REAL (in accordance with CIFAKE paper)
 - unroll CNN structure from cifar10_tutorial.ipynb to visualise/understand structure 
 - modify CNN structure from class for binary classification (add sigmoid, change to BCELoss)  
 - adapt testing for binary task (round to 0/1 with simple 0.5 thresh)  
+- typed up some documentation, pulled classes/train/test functions apart
 
 #### V01.01  
 - first run with these minimal changes in place    
@@ -49,8 +50,28 @@ TBD:
 - run more epochs on GPU (GitHub sync); compare architecture with paper (p6ff)  
 - look at params  
 - torch seed!
+- add threshold keyword for test evaluation 
 
+Performance seeded
+Performance  
+Accuracy: 90.24%  
+Precision: 92.14%  
+Recall: 87.98%  
+F1-Score: 90.01%  
 
+Varying threshold for 0/1 decision (previously 0.5), 'fairly good' performance is easy to achieve, so task does not seem to be particularly difficult?
+
+Performance with thresh 0.1  
+Accuracy: 74.09%  
+Precison: 66.24%  
+Recall: 98.22%  
+F1-Score: 79.12%  
+Could make a plot from this! - done!
+
+#### Next:
+- architecture experiments?
+- data bias?
+- attention? Cf repos Maria 
 
 
 
