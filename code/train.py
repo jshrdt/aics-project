@@ -16,7 +16,7 @@ parser.add_argument('-bs', '--batch_size', help='size of train data batches',
                     default=32)
 parser.add_argument('-ep', '--epochs', help='number of epochs to train on',
                     default=5)
-parser.add_argument('-save', '--save_model', help='number of epochs to train on',
+parser.add_argument('-save', '--save_model', help='set whether to save model',
                     action='store_true', default=False)
 args, unk = parser.parse_known_args()
 
@@ -63,6 +63,7 @@ def train(model: CIFAKE_CNN, data: list[tuple], epochs: int = 5,
         for i, batch in tqdm(enumerate(data), total=n_batches):
             # reset gradient
             optimizer.zero_grad()
+
             # Extract input and labels, make predictions
             X, y = batch
             output = model(X)

@@ -1,6 +1,6 @@
 {
     "CIFAKE_dir": "../data/CIFAKE/",
-    "model": "./model_v01.01.pth"
+    "model": "./model_v01.02.pth"
 
 
 
