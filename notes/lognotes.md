@@ -77,6 +77,6 @@ Could make a plot from this! - done!
 Added SRM (Style reduction module) layer after first conv/pool pair (channels 6)   
 Slower to train (in terms of loss progression), but 5 epochs already reaching 89%; peak closer to thresh 0.6
 
-- 30 epochs (loss still decreasing): epoch: 29	total loss: 429.3308508070186	avg loss: 0.13738587225824594; thresh:0.7, acc	92.364236, prec	92.683664, rec	91.988398, f1	92.334722
+- 30 epochs (loss still decreasing): epoch: 29	total loss: 429.3308508070186	avg loss: 0.13738587225824594; thresh:0.7, acc	92.364236, prec	92.683664, rec	91.988398, f1	92.334722; img: SRM01e30DEC18
 
 
