@@ -3,7 +3,7 @@
 
 An exploration of ML for the detection of AI-generated images which imitate photographic realism based on Bird & Lotfi (2024) and the CIFAKE (Bird, 2023) dataset.
 
-Required datasets:
+Required datasets:  
 CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data  
 CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data  
 
@@ -13,11 +13,11 @@ ___
 * pretrained model files are stored in models/
 * go to code/aics0.ipynb or code/aics_mini.ipynb to view performances  
   
-* train & test own models with cmd line scripts train.py & test.py (described below)  
+As an example; to quickly train & test your own model, which will be stored in & loaded from models/, with cmd line scripts train.py & test.py (described in below under code/):  
+
 Ex. from aics-project/code, call:
 > $ python3 train.py -ep1 -mf dummymodel  
 > $ python3 test.py -mf dummymodel
-* to quickly train & test your own model which will be stored in & loaded from models/
 
 ___
 
@@ -36,16 +36,20 @@ code/: all code should go in this folder. For coding we recommend using Jupyter 
 ### Notebooks
 
 #### aics0.ipynb
-* ...
+* Training & testing of the base model and model modified with SRM channel attention
 
 #### aics_mini.ipynb
 * Exploration of CIFAKE task difficulty; examine training progress of first epoch after X batches
+
+#### aics_cifar100.ipynb
+* Testing the transfer performance of base, mini, and attention model on cifar100 (unseen, real images)
+* Viewing performance per super- and atomic class
 
 ### Scripts
 
 #### classes.py  
 OOP classes for...  
-* CIFAKE_loader: data batching, transformation, encoding
+* CI_loader: data batching, transformation, encoding; used for CIFAKE & CIFAR100
 * CIFAKE_CNN: Model architecture based on cifar10_tutorial.ipynb, modified for binary classification
 * SRMLayer: Style-recalibration module channel attention layer (https://blog.paperspace.com/srm-channel-attention/)
 
@@ -56,7 +60,7 @@ Example call:
 > $ python3 train.py -ep1 -mf dummymodel
 
 #### test.py
-* Script to test & evaluate model on CIFAKE test data, includes eval functions used in notebooks
+* Script to test & evaluate model on CIFAKE, CIFAR100 test data, includes eval functions used in notebooks
 * cmd line args: modelfile (mf; model to test from '../models/{args.modelfile}.pth', default: base_model), decision_threshold (thr; 0.5)  
 Example call:  
 > $ python3 test.py -thr 0.4

@@ -75,6 +75,38 @@ def score_preds(gold: list, preds: list, thresh: float = 0.5, per_class=False,
 
     return acc, prec, rec, f1, eval
 
+def score_content_preds(gold: list, preds: list, class_dict: dict,
+                        thresh: float = 0.5, ) -> tuple[float]:
+    """Scoring function for content labels from CIFAR100."""
+    # make real/fake decision
+    real_fake_preds = [1 if pred >= thresh else 0 for pred in preds]
+
+    # here, store content label as prediction, if 'real' was predicted,
+    # to get performance per content class
+    y_pred = list()
+    gold = [x[1] for x in gold] # content labels
+    for pred, g in zip(real_fake_preds, gold):
+        if pred == 1: #correctly id'd as real img in cifar100
+            y_pred.append(g)
+        else:
+            y_pred.append(-1)
+    # get labels as idx & labels as strin for df later
+    labs = list(set([int(x) for x in gold]))
+    cols = [class_dict[x] if x!=-1 else 'FAKE' 
+            for x in labs]
+
+    acc = accuracy_score(gold, y_pred)
+    rec = recall_score(gold, y_pred, labels=labs, average=None, zero_division=0.0)
+
+    # Add per-class measures & averages
+    eval = pd.DataFrame([rec],
+                        index=["recall"],
+                        columns=cols).transpose()
+
+    print(f'\nPerformance (n={len(gold)} test imgs, decision threshold={thresh})')
+    print(f'Overall accuracy: {acc:.2%}\n', eval, sep='\n')
+
+    return acc, eval
 
 def test_thresh_size(gold, preds):
     """Calculate and return evaluation metrics for a given set of gold
