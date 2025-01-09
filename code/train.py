@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm.notebook import tqdm
 
-from classes import CIFAKE_loader, CIFAKE_CNN
+from classes import CI_LOADER, CIFAKE_CNN
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-bs', '--batch_size', help='size of train data batches',
@@ -38,7 +38,7 @@ def get_files(cifake_dir: str):
     return collect
 
 
-def train_model(model: CIFAKE_CNN, data: CIFAKE_loader, epochs: int = 5,
+def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
           learn_rate: float = 0.001, momentum: float = 0.9,
           log: bool = False) -> CIFAKE_CNN:
     """Train and return CNN for binary image classification.
@@ -96,7 +96,7 @@ if __name__=='__main__':
     from tqdm import tqdm
     # Get files & create loader
     train_files = get_files(config['CIFAKE_dir'])['train']
-    traindata = CIFAKE_loader(train_files, batch_size=int(args.batch_size))
+    traindata = CI_LOADER(train_files, batch_size=int(args.batch_size))
     # Initiate & train model
     model = CIFAKE_CNN()
     model = train_model(model, traindata, epochs=int(args.epochs))

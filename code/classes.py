@@ -8,13 +8,14 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 
-class CIFAKE_loader:
+class CI_LOADER():
     # my class entirely, only self.transform taken from course's cifar10_tutorial.ipynb
-    def __init__(self, data, batch_size=32, device='cpu'):
+    def __init__(self, data, batch_size=32, device='cpu', source='CIFAKE'):
+        self.device = device
+        self.source = source
         self.data = data
         self.batch_size = batch_size
         self._index = 0
-        self.device = device
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -67,10 +68,17 @@ class CIFAKE_loader:
     def trans_img(self, img):
         # Open img file as PIL Image, get np array, normalise to (0, 1),
         # then torchvision transform & normalise.
-        return self.transform(np.array(Image.open(img))/255).float()
+        if self.source=='CIFAKE':
+            img = Image.open(img)
+        elif self.source=='CIFAR100':
+            img = img.reshape(3,32,32).transpose(1,2,0)
+        return self.transform(np.array(img)/255).float()
 
     def trans_label(self, label):
-        label_idx = 1 if label=='REAL' else 0
+        if self.source=='CIFAKE':
+            label_idx = 1 if label=='REAL' else 0
+        elif self.source=='CIFAR100': #also keep content class
+            label_idx = (1, label)  #only rel imgs
         return torch.tensor(label_idx).float()
 
 

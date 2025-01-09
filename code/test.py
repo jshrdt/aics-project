@@ -9,8 +9,10 @@ import json
 from tqdm.notebook import tqdm
 import torch
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
+import matplotlib.pyplot as plt
 
-from classes import CIFAKE_CNN, CIFAKE_loader
+
+from classes import CIFAKE_CNN, CI_LOADER
 from train import get_files
 
 parser = argparse.ArgumentParser()
@@ -25,7 +27,7 @@ with open('config.json') as f:
     config = json.load(f)
 
 
-def test_model(model: CIFAKE_CNN, testdata: CIFAKE_loader) -> tuple[list]:
+def test_model(model: CIFAKE_CNN, testdata: CI_LOADER) -> tuple[list]:
     """Test binary CNN model on test dataloader, return y_true and y_pred."""
     gold, preds = list(), list()
     n_batches = len(testdata)//testdata.batch_size
@@ -41,26 +43,37 @@ def test_model(model: CIFAKE_CNN, testdata: CIFAKE_loader) -> tuple[list]:
     return gold, preds
 
 
-def score_preds(gold: list, preds: list, thresh: float = 0.5,
+def score_preds(gold: list, preds: list, thresh: float = 0.5, per_class=False,
                 verbose: bool = False) -> tuple[float]:
     """Make binary label decision for y_pred based on threshold, 
     calculate and return evaluation metrics with y_true."""
+    if per_class:
+        labs=[0,1]
+        avg=None
+    else:
+        labs=None
+        avg='binary'
 
     y_pred = [1 if pred >= thresh else 0 for pred in preds]
     acc = accuracy_score(gold, y_pred)
-    prec = precision_score(gold, y_pred)
-    rec = recall_score(gold, y_pred)
-    f1  = f1_score(gold, y_pred)
+    prec = precision_score(gold, y_pred, labels=labs, average=avg)
+    rec = recall_score(gold, y_pred, labels=labs, average=avg)
+    f1  = f1_score(gold, y_pred, labels=labs, average=avg)
+    if per_class:
+        # Add per-class measures & averages
+        eval = pd.DataFrame([np.append(m, sum(m)/len(m)) for m in [prec,rec,f1]],
+                            index=["precision", "recall", "f1-score"],
+                            columns=['Fake', 'Real', 'Average'])
+    else:
+        eval = pd.DataFrame([prec,rec,f1],
+                            index=["precision", "recall", "f1-score"],
+                            columns=['score'])
 
     if verbose:
         print(f'\nPerformance (n={len(gold)} test imgs, decision threshold={thresh})')
-        print(f'Accuracy:\t{acc:.2%}',
-              f'Precison:\t{prec:.2%}',
-              f'Recall: \t{rec:.2%}',
-              f'F1-Score:\t{f1:.2%}',
-              sep='\n')
+        print(f'Overall accuracy: {acc:.2%}\n', eval, sep='\n')
 
-    return acc, prec, rec, f1
+    return acc, prec, rec, f1, eval
 
 
 def test_thresh_size(gold, preds):
@@ -76,11 +89,19 @@ def test_thresh_size(gold, preds):
         df = pd.DataFrame(data.values(), index=data.keys()).mul(100)
     return df
 
+def visualise(thresh_data_df):
+    fig = thresh_data_df.plot()
+    fig.set_ylabel('Score %')
+    fig.set_xlabel('Decision threshold value')
+    fig.title.set_text('Effect of decision threshold size on evaluation metrics')
+    fig.legend(loc='lower center')
+    plt.show()
+
 if __name__=='__main__':
     from tqdm import tqdm
     # Fetch test files & get test data
     testfiles = get_files(config['CIFAKE_dir'])['test']
-    testdata = CIFAKE_loader(testfiles, batch_size=32)
+    testdata = CI_LOADER(testfiles, batch_size=32)
     # Load the model to test
     model = CIFAKE_CNN()
     model.load_state_dict(torch.load(f"../models/{args.modelfile}.pth"))

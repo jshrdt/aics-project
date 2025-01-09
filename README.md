@@ -4,17 +4,18 @@
 An exploration of ML for the detection of AI-generated images which imitate photographic realism based on Bird & Lotfi (2024) and the CIFAKE (Bird, 2023) dataset.
 
 Required datasets:
-CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data
+CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data  
+CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data  
 
 ___
 
 #### Quickstart:
 * pretrained model files are stored in models/
-* go to code/aics0.ipynb or code/aics_mini.ipynb to view performances
-
+* go to code/aics0.ipynb or code/aics_mini.ipynb to view performances  
+  
 * train & test own models with cmd line scripts train.py & test.py (described below)  
-Ex., from aics-project/code, call:
-> $ python3 train.py -ep1 -mf dummymodel
+Ex. from aics-project/code, call:
+> $ python3 train.py -ep1 -mf dummymodel  
 > $ python3 test.py -mf dummymodel
 * to quickly train & test your own model which will be stored in & loaded from models/
 
@@ -68,6 +69,7 @@ ____
 data/: use this folder for datasets that you have created. Those that can be downloaded from elsewhere can be referenced in README.md and files that are created by your code should be in your folder on MLTGPU. If you need to upload large files to Github, you can use their Git Large File Storage.
 
 * (CIFAKE should be placed in here)
+* (CIFAR100 should be placed in here)
 
 ____
 

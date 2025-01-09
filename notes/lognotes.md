@@ -79,33 +79,43 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 
 - 30 epochs (loss still decreasing): epoch: 29	total loss: 429.3308508070186	avg loss: 0.13738587225824594; thresh:0.7, acc	92.364236, prec	92.683664, rec	91.988398, f1	92.334722; img: SRM01e30DEC18
 
-[paper writing, formulating plan]
-
 #### Dec20
 - looking for other possible real vs fake img datasets
 
+[looking for datasets, formulating plan based on research interest]
+[directions:(cifar100, other fake images, attn heat maps, zero/few shot; dataset bias]
+
 #### Jan7
-- start on paper
-- considerations which of proposed directions to explore (cifar100, other fake images, attn heat maps, zero/few shot; dataset bias)
+- start on paper & pptx
 
 #### Jan8
 - rewrite loader to transform data + send to device only once on first epoch
-- plan: mini, normal, v attention on CIFAKE
+- models: mini, base, v attention on CIFAKE
 - per-batch learning for mini: difficulty of task in CIFAKE?
-- normal: og attempt
-- attention: improvement on paper/extension
+- normal/base: og attempt
+- attention: improvement on paper/extension with SRM channel attn layer
 
 - added mini_model: train only 1 epoch, logging losses/accuracy every X batches to test task difficulty
-- closer look at the other ai vs real image datasets collected
+- closer look at the other ai vs real image datasets collected; need to restrict to photorealism style
 - code organisation
 
-then:
+#### Next:
 - apply to other fake data
-- apply to CIFAR100 unseen categories
+- apply to CIFAR100 unseen categories (edit note: all are unseen, datasets have no overlap in imgs/categs)
 
 #### Jan9
 - documentation; cmd line compatibility of scripts
+- loading, modifying code for CIFAR100
+- applying CIFAKE base model to CIFAR100 test set: IRL false negative (labelled fake despite being real)
+- Performance (n=9984 test imgs, decision threshold=0.5); Accuracy: 95.45%, Precision: 100.00%, Recall: 95.45%, F1-Score: 97.67%
+- fairly decent; smaller thr with better performance; but even at thr 0.9 accuracy still at 83%
 
+- added per-class (binary real/fake) performance to eval on CIFAKE; for better comparison between classes & attn vs base models
+- also useful for comparison with transfer performance 
+- added per-class performance on CIFAR100 (20 coarse vs 100 fine content classes)
+- run on mini & attn model as well, but TBD for attn choose cutoff point/params?
 
+external 'fake' imgs dataset selection:
+- ?
 
 
