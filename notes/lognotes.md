@@ -79,4 +79,33 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 
 - 30 epochs (loss still decreasing): epoch: 29	total loss: 429.3308508070186	avg loss: 0.13738587225824594; thresh:0.7, acc	92.364236, prec	92.683664, rec	91.988398, f1	92.334722; img: SRM01e30DEC18
 
+[paper writing, formulating plan]
+
+#### Dec20
+- looking for other possible real vs fake img datasets
+
+#### Jan7
+- start on paper
+- considerations which of proposed directions to explore (cifar100, other fake images, attn heat maps, zero/few shot; dataset bias)
+
+#### Jan8
+- rewrite loader to transform data + send to device only once on first epoch
+- plan: mini, normal, v attention on CIFAKE
+- per-batch learning for mini: difficulty of task in CIFAKE?
+- normal: og attempt
+- attention: improvement on paper/extension
+
+- added mini_model: train only 1 epoch, logging losses/accuracy every X batches to test task difficulty
+- closer look at the other ai vs real image datasets collected
+- code organisation
+
+then:
+- apply to other fake data
+- apply to CIFAR100 unseen categories
+
+#### Jan9
+- documentation; cmd line compatibility of scripts
+
+
+
 

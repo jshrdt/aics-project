@@ -8,22 +8,21 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 
-random.seed(11)
-
 class CIFAKE_loader:
     # my class entirely, only self.transform taken from course's cifar10_tutorial.ipynb
-    def __init__(self, data, batch_size=32):
+    def __init__(self, data, batch_size=32, device='cpu'):
         self.data = data
-        random.shuffle(data)
         self.batch_size = batch_size
         self._index = 0
-
+        self.device = device
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
             #transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])  # is for pretrained?
         # ? v2.RandomResizedCrop(size=(224, 224), antialias=True),
         # ? v2.RandomHorizontalFlip(p=0.5),
+        self.batches = self.batcher()
+
 
     def __len__(self):
         return len(self.data)
@@ -31,25 +30,39 @@ class CIFAKE_loader:
     def __iter__(self):
         return self
 
-    def __next__(self):
-        if self._index < len(self)//self.batch_size:
+    def batcher(self):
+        batches = list()
+        random.Random(11).shuffle(self.data)  # only seed overall batches
+        for i in range(len(self)//self.batch_size):
             # slice data & shuffle item tuples in batch.
-            start = self.batch_size*self._index
-            stop = self.batch_size*(self._index+1)
+            start = self.batch_size*i
+            stop = self.batch_size*(i+1)
             batch = self.data[start:stop]
-            random.shuffle(batch)
             # Transform image files to normalised tensor matrix,
             # binary encode & torch stack classes in parallel (FAKE-1).
-            try:
-                batch = [torch.stack([self.trans_img(item[0]) for item in batch]),
-                        torch.stack([self.trans_label(item[1]) for item in batch])]
-            except:
-                print(self._index, batch)
+            batch = (torch.stack([self.trans_img(item[0]) for item in batch]).to(self.device),
+                    torch.stack([self.trans_label(item[1]) for item in batch]).to(self.device))
+            batches.append(batch)
+
+        return batches
+
+    def __next__(self):
+        if self._index == 0:
+            # Shuffle overall batch order on new epoch
+            random.shuffle(self.batches)
+
+        if self._index < len(self)//self.batch_size:
+            # random permute X and y
+            batch = self.batches[self._index]
+            # shuffle batch
+            perm = torch.randperm(len(batch[0]))
+            batch = (batch[0][perm], batch[1][perm])
             self._index += 1
             return batch
         else:
             self._index = 0
             raise StopIteration
+
 
     def trans_img(self, img):
         # Open img file as PIL Image, get np array, normalise to (0, 1),
@@ -61,28 +74,48 @@ class CIFAKE_loader:
         return torch.tensor(label_idx).float()
 
 
+#?attn repos# https://github.com/changzy00/pytorch-attention/tree/master
+
+class SRMLayer(nn.Module):
+    #?#https://github.com/EvgenyKashin/SRMnet/tree/master/models
+# https://github.com/changzy00/pytorch-attention/blob/master/attention_mechanisms/srm.py
+# official sem : https://github.com/hyunjaelee410/style-based-recalibration-module/blob/master/models/resnet.py
+# https://blog.paperspace.com/srm-channel-attention/
+    def __init__(self, channel, reduction=None):
+        # Reduction for compatibility with layer_block interface
+        super(SRMLayer, self).__init__()
+
+        # CFC: channel-wise fully connected layer
+        self.cfc = nn.Conv1d(channel, channel, kernel_size=2, bias=False,
+                             groups=channel)
+        self.bn = nn.BatchNorm1d(channel)
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+
+        # Style pooling
+        mean = x.view(b, c, -1).mean(-1).unsqueeze(-1)
+        std = x.view(b, c, -1).std(-1).unsqueeze(-1)
+        u = torch.cat((mean, std), -1)  # (b, c, 2)
+
+        # Style integration
+        z = self.cfc(u)  # (b, c, 1)
+        z = self.bn(z)
+        g = torch.sigmoid(z)
+        g = g.view(b, c, 1, 1)
+
+        return x * g.expand_as(x)
+
+
 class CIFAKE_CNN(nn.Module):
     # from cifar10_tutorial.ipynb; so far only chaned fc3 final dim to 1
     # for binary classification + added Sigmoid
-    def __init__(self):
+    def __init__(self, attn=False):
+        self.attn = attn
         super().__init__()
-        ## unroll to visualise used structure from class
-        # self.net = nn.Sequential(
-        #     nn.Conv2d(3, 6, 5),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(2, 2),
-        #      nn.Conv2d(6, 16, 5),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(2, 2),
-        #      nn.Flatten(),
-        #     nn.Linear(16 * 5 * 5, 120),
-        #     nn.ReLU(),
-        #     nn.Linear(120, 84),
-        #     nn.ReLU(),
-        #      nn.Linear(84, 10))
-
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
+        self.attend = SRMLayer(6)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
@@ -93,6 +126,8 @@ class CIFAKE_CNN(nn.Module):
     def forward(self, x):
         #  out = self.net(x)
         x = self.pool(F.relu(self.conv1(x)))
+        if self.attn:
+            x = self.attend(x)
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))

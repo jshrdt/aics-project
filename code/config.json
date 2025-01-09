@@ -1,9 +1,7 @@
 {
     "CIFAKE_dir": "../data/CIFAKE/",
-    "model": "./model_v01.02.pth"
-
-
-
-
+    "basemodel": "../models/base_model.pth",
+    "attn_model": "../models/SRM_model.pth",
+    "mini_model": "../models/mini_model"
 
 }

@@ -1,5 +1,6 @@
 # Train script
 # Imports
+print('Running...')
 import argparse
 import os
 
@@ -16,8 +17,8 @@ parser.add_argument('-bs', '--batch_size', help='size of train data batches',
                     default=32)
 parser.add_argument('-ep', '--epochs', help='number of epochs to train on',
                     default=5)
-parser.add_argument('-save', '--save_model', help='set whether to save model',
-                    action='store_true', default=False)
+parser.add_argument('-mf', '--modelfile', help='set filename to save model to (in ../models{modelname}.pth)',
+                    default=False)
 args, unk = parser.parse_known_args()
 
 with open('config.json') as f:
@@ -37,8 +38,9 @@ def get_files(cifake_dir: str):
     return collect
 
 
-def train(model: CIFAKE_CNN, data: list[tuple], epochs: int = 5,
-          learn_rate: float = 0.001, momentum: float = 0.9) -> CIFAKE_CNN:
+def train_model(model: CIFAKE_CNN, data: CIFAKE_loader, epochs: int = 5,
+          learn_rate: float = 0.001, momentum: float = 0.9,
+          log: bool = False) -> CIFAKE_CNN:
     """Train and return CNN for binary image classification.
 
     Args:
@@ -51,8 +53,8 @@ def train(model: CIFAKE_CNN, data: list[tuple], epochs: int = 5,
     Returns:
         CIFAKE_CNN: CNN model for binary image classification
     """
-    # own function, structure base from cifar10_tutorial.ipynb, but modified
-    # everthing but the running_loss usage
+    # my function, structure base from cifar10_tutorial.ipynb; modified
+    # everthing but the running_loss usage, lr, momentum
     criterion = nn.BCELoss()  # match loss for binary classification
     optimizer = optim.SGD(model.parameters(), lr=learn_rate, momentum=momentum)
     n_batches=len(data)//data.batch_size  # determine nr of batches for pretty tqdm
@@ -78,7 +80,7 @@ def train(model: CIFAKE_CNN, data: list[tuple], epochs: int = 5,
             optimizer.step()
 
             # print statistics
-            if i % (n_batches//4) == (n_batches//4)-1:
+            if log and i % (n_batches//4) == (n_batches//4)-1:
                 print(f'[{epoch+1}, {i+1:5d}] avg loss: {running_loss/(n_batches//4):.3f}',
                       end='\r')  # kept from class notebook, udpated with n_batches
                 running_loss = 0.0
@@ -91,13 +93,16 @@ def train(model: CIFAKE_CNN, data: list[tuple], epochs: int = 5,
 
 
 if __name__=='__main__':
+    from tqdm import tqdm
     # Get files & create loader
     train_files = get_files(config['CIFAKE_dir'])['train']
-    traindata = CIFAKE_loader(train_files, batch_size=args.batch_size)
+    traindata = CIFAKE_loader(train_files, batch_size=int(args.batch_size))
     # Initiate & train model
     model = CIFAKE_CNN()
-    model = train(model, traindata, epochs=args.epochs)
+    model = train_model(model, traindata, epochs=int(args.epochs))
 
     # Optional: save to file
-    if args.save_model:
-        torch.save(model.state_dict(), config['model'])
+    if args.modelfile:
+        torch.save(model.state_dict(), f"../models/{args.modelfile}.pth")
+        print('Model saved to', f"../models/{args.modelfile}.pth")
+    print('\n-- Finished --')
