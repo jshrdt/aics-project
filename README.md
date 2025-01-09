@@ -6,6 +6,9 @@ An exploration of ML for the detection of AI-generated images which imitate phot
 Required datasets:  
 CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data  
 CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data  
+ai-generated-images-vs-real-images/test: https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images (only the test dir!)
+
+
 
 ___
 
@@ -35,15 +38,18 @@ code/: all code should go in this folder. For coding we recommend using Jupyter 
 
 ### Notebooks
 
-#### aics0.ipynb
+#### CIFAKE_classification.ipynb
 * Training & testing of the base model and model modified with SRM channel attention
 
-#### aics_mini.ipynb
+#### func_difficulty
 * Exploration of CIFAKE task difficulty; examine training progress of first epoch after X batches
 
-#### aics_cifar100.ipynb
+#### transfer_cifar100.ipynb
 * Testing the transfer performance of base, mini, and attention model on cifar100 (unseen, real images)
 * Viewing performance per super- and atomic class
+
+#### transfer_mixed.ipynb
+* Testing the transfer performance of base, mini, and attention model on dataset of ai/real imgs from various origins/styles (Zhang)
 
 ### Scripts
 

@@ -12,8 +12,7 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
 import matplotlib.pyplot as plt
 
 
-from classes import CIFAKE_CNN, CI_LOADER
-from train import get_files
+from classes import CIFAKE_CNN, CI_LOADER, get_files
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-mf', '--modelfile', help='set filename to load model from (in ../models{modelname}.pth)',
@@ -31,6 +30,7 @@ def test_model(model: CIFAKE_CNN, testdata: CI_LOADER) -> tuple[list]:
     """Test binary CNN model on test dataloader, return y_true and y_pred."""
     gold, preds = list(), list()
     n_batches = len(testdata)//testdata.batch_size
+    model.eval()
     with torch.no_grad():
         for data in tqdm(testdata, total=n_batches):
             X, y_true = data
@@ -74,6 +74,7 @@ def score_preds(gold: list, preds: list, thresh: float = 0.5, per_class=False,
         print(f'Overall accuracy: {acc:.2%}\n', eval, sep='\n')
 
     return acc, prec, rec, f1, eval
+
 
 def score_content_preds(gold: list, preds: list, class_dict: dict,
                         thresh: float = 0.5, ) -> tuple[float]:

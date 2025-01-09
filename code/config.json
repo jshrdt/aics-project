@@ -1,6 +1,7 @@
 {
     "CIFAKE_dir": "../data/CIFAKE/",
-    "basemodel": "../models/base_model.pth",
+    "AI_imgs_zhang": "../data/ai-generated-images-vs-real-images/",
+    "base_model": "../models/base_model.pth",
     "attn_model": "../models/SRM_model.pth",
     "mini_model": "../models/mini_model.pth"
 

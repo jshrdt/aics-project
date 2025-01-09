@@ -2,7 +2,6 @@
 # Imports
 print('Running...')
 import argparse
-import os
 
 import json
 import torch
@@ -10,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm.notebook import tqdm
 
-from classes import CI_LOADER, CIFAKE_CNN
+from classes import CI_LOADER, CIFAKE_CNN, get_files
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-bs', '--batch_size', help='size of train data batches',
@@ -23,19 +22,6 @@ args, unk = parser.parse_known_args()
 
 with open('config.json') as f:
     config = json.load(f)
-
-
-def get_files(cifake_dir: str):
-    """Get train/test files from cifake_dir as dict, specific to cifake dir"""
-    collect = dict()
-    for root, dirs, files in os.walk(cifake_dir):
-        if len(files)>1:
-            subdir = root.split('/')[-2]
-            subclass = root.split('/')[-1]
-            collect[subdir] = (collect.get(subdir, list())
-                               + [(os.path.join(root, fname), subclass)
-                                  for fname in files])
-    return collect
 
 
 def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,

@@ -1,12 +1,27 @@
 ## OOP used in project
+import os
+
 import random
 import numpy as np
-
 from PIL import Image
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.nn.functional as F
+from tqdm import tqdm
+
+def get_files(cifake_dir: str):
+    """Get train/test files from cifake_dir as dict, specific to cifake dir"""
+    collect = dict()
+    for root, dirs, files in os.walk(cifake_dir):
+        if len(files)>1:
+            subdir = root.split('/')[-2]
+            subclass = root.split('/')[-1]
+            collect[subdir] = (collect.get(subdir, list())
+                               + [(os.path.join(root, fname), subclass)
+                                  for fname in files])
+    return collect
+
 
 class CI_LOADER():
     # my class entirely, only self.transform taken from course's cifar10_tutorial.ipynb
@@ -41,9 +56,15 @@ class CI_LOADER():
             batch = self.data[start:stop]
             # Transform image files to normalised tensor matrix,
             # binary encode & torch stack classes in parallel (FAKE-1).
-            batch = (torch.stack([self.trans_img(item[0]) for item in batch]).to(self.device),
-                    torch.stack([self.trans_label(item[1]) for item in batch]).to(self.device))
-            batches.append(batch)
+            try: # sometimes fails on Zhang transfer data set
+                batch = (torch.stack([self.trans_img(item[0]) for item in batch]).to(self.device),
+                        torch.stack([self.trans_label(item[1]) for item in batch]).to(self.device))
+                batches.append(batch)
+            except:
+                if self.source == 'Zhang':
+                    continue
+                else: # should not be reached
+                    raise ValueError('Error on CIFAKE/CIFAR')
 
         return batches
 
@@ -72,11 +93,13 @@ class CI_LOADER():
             img = Image.open(img)
         elif self.source=='CIFAR100':
             img = img.reshape(3,32,32).transpose(1,2,0)
+        elif self.source=='Zhang':
+            img = Image.open(img).resize((32,32))
         return self.transform(np.array(img)/255).float()
 
     def trans_label(self, label):
-        if self.source=='CIFAKE':
-            label_idx = 1 if label=='REAL' else 0
+        if self.source=='CIFAKE' or 'Zhang':
+            label_idx = 1 if label.lower()=='real' else 0
         elif self.source=='CIFAR100': #also keep content class
             label_idx = (1, label)  #only rel imgs
         return torch.tensor(label_idx).float()

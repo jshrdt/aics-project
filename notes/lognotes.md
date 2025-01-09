@@ -115,7 +115,10 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 - added per-class performance on CIFAR100 (20 coarse vs 100 fine content classes)
 - run on mini & attn model as well, but TBD for attn choose cutoff point/params?
 
-external 'fake' imgs dataset selection:
-- ?
+- load & transfer mini, base, attn to external mixed real/fake dataset (ai-generated-images-vs-real-images, Tristan Zhang; https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images/data)
+- no high hopes for performance, but intended for paper critique; CIFAKE is not suited for transfer; results in paper also seem 'naive'; their model likely overfits,  "providing not only a system that can recognise synthetic images but also data and interpretation."...well no.
+- " significant contribution is made through the release of the CIFAKE dataset."; contrition to what, exactly
+
+- experimenting with architecture: SRM after conv2d/pooling layers, instead of in-between; initial loss lower?
 
 
