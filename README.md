@@ -3,22 +3,22 @@
 
 An exploration of ML for the detection of AI-generated images which imitate photographic realism based on Bird & Lotfi (2024) and the CIFAKE (Bird, 2023) dataset.
 
-Required datasets:  
+Required datasets, to be placed in code/:  
 CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data  
 CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data  
 ai-generated-images-vs-real-images/test: https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images (only the test dir!)
-
-
 
 ___
 
 #### Quickstart:
 * pretrained model files are stored in models/
-* go to code/aics0.ipynb or code/aics_mini.ipynb to view performances  
+* go to code/CIFAKE_classification.ipynb or code/func_difficulty.ipynb for training/testing on CIFAKE  
+* then to transfer_cifar100.ipynb or transfer_mixed.ipynb to load & apply models on CIFAR100/AGIRI
   
-As an example; to quickly train & test your own model, which will be stored in & loaded from models/, with cmd line scripts train.py & test.py (described in below under code/):  
 
-Ex. from aics-project/code, call:
+Models can also be trained/tested from the cmd line, but this is not necessarily for the notebooks/analysis; they be stored in & loaded from models/
+
+For the cmd line scripts train.py & test.py (described in below under code/), from aics-project/code, call e.g.:
 > $ python3 train.py -ep1 -mf dummymodel  
 > $ python3 test.py -mf dummymodel
 
@@ -90,38 +90,34 @@ ____
 
 models/: place to store trained models for simple loading  
 
+* shared params: batch size 32, learn rate 0.001, momentum 0.9
+
 #### base_model.pth
-* base CIFAKE_CNN, trained on CIFAKE train data
-* epochs 10, batch size 32, learn rate 0.001, momentum 0.9
-* Performance (thr 0.5): Accuracy: 91.39%, Precison: 88.43%, Recall: 95.23%, F1-Score: 91.70%
-* Performance peaks per threshold: Accuracy 92.26% (0.7), Precision 96.76% (0.9), Recall 99.15% (0.1), F1-Score 92.22% (0.6)
+* base CIFAKE_CNN, trained on CIFAKE train data, epochs 10
 
 #### mini_model.pth
-* base CIFAKE_CNN, trained on 95% of CIFAKE train data to examine task difficulty
-* epoch 1, batch size 32, learn rate 0.001, momentum 0.9
-* Performance (thr 0.5): Accuracy: 77.46%, Precison: 74.42%, Recall: 83.69%, F1-Score: 78.78%
+* base CIFAKE_CNN, trained on CIFAKE train data for 1 epoch to examine task difficulty
 
 #### attn_model.pth
-* CIFAKE_CNN with SRM channel attention layer, trained on CIFAE train data
-* ...
-* ...
+* CIFAKE_CNN with SRM channel attention layer before 2nd conv2d layer, trained on CIFAKE train data (same params as base)
 
 ____
 
 notes/: To show the work that you have done (especially important if you get a negative result) you should keep a lab log as you work. This will also allow you to write the report faster. Use this folder with markdown text. files as a wiki to document your experiment and take notes as you go along. These files can also be edited and viewed on Github.
 
 #### lognotes.md
-* work progress diary
+* work progress diary (messy, personal use)
 
 ____
 
 paper/: a place for your course report and presentation
 
 #### LT2318_AICS_project_pitch.pdf
-* original project pitch
+* original project pitch; proposed project steps
+* updated on canvas discussion thread
 
-#### aics_report_draft.pages
-* project paper (draft)
+#### aics_report_v01.pdf
+* project paper
 
 #### aics_ppp.pptx
 * presentation slides (draft)
