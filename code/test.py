@@ -1,16 +1,14 @@
-## helper functions for testing ##
+## helper functions for evaluation ##
 # Imports
-print('Running...')
 import argparse
+
+import json
+import torch
+from tqdm.notebook import tqdm
 import numpy as np
 import pandas as pd
-import json
-
-from tqdm.notebook import tqdm
-import torch
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 import matplotlib.pyplot as plt
-
 
 from classes import CIFAKE_CNN, CI_LOADER, get_files
 
@@ -29,10 +27,9 @@ with open('config.json') as f:
 def test_model(model: CIFAKE_CNN, testdata: CI_LOADER) -> tuple[list]:
     """Test binary CNN model on test dataloader, return y_true and y_pred."""
     gold, preds = list(), list()
-    n_batches = len(testdata)//testdata.batch_size
     model.eval()
     with torch.no_grad():
-        for data in tqdm(testdata, total=n_batches):
+        for data in tqdm(testdata, total=len(testdata.batches)):
             X, y_true = data
             # calculate outputs by running images through the network
             output = model(X).squeeze()
@@ -43,22 +40,19 @@ def test_model(model: CIFAKE_CNN, testdata: CI_LOADER) -> tuple[list]:
     return gold, preds
 
 
-def score_preds(gold: list, preds: list, thresh: float = 0.5, per_class=False,
-                verbose: bool = False) -> tuple[float]:
+def score_preds(gold: list, preds: list, thresh: float = 0.5,
+                per_class: bool = False, verbose: bool = False) -> tuple[float]:
     """Make binary label decision for y_pred based on threshold, 
     calculate and return evaluation metrics with y_true."""
-    if per_class:
-        labs=[0,1]
-        avg=None
-    else:
-        labs=None
-        avg='binary'
+
+    labs, avg = ([0,1], None) if per_class else (None, 'binary')
 
     y_pred = [1 if pred >= thresh else 0 for pred in preds]
     acc = accuracy_score(gold, y_pred)
-    prec = precision_score(gold, y_pred, labels=labs, average=avg)
-    rec = recall_score(gold, y_pred, labels=labs, average=avg)
+    prec = precision_score(gold, y_pred, labels=labs, average=avg, zero_division=0.0)
+    rec = recall_score(gold, y_pred, labels=labs, average=avg, zero_division=0.0)
     f1  = f1_score(gold, y_pred, labels=labs, average=avg)
+
     if per_class:
         # Add per-class measures & averages
         eval = pd.DataFrame([np.append(m, sum(m)/len(m)) for m in [prec,rec,f1]],
@@ -80,40 +74,34 @@ def score_content_preds(gold: list, preds: list, class_dict: dict,
                         thresh: float = 0.5, ) -> tuple[float]:
     """Scoring function for content labels from CIFAR100."""
     # make real/fake decision
-    real_fake_preds = [1 if pred >= thresh else 0 for pred in preds]
+    binary_preds = [1 if pred >= thresh else 0 for pred in preds]
 
-    # here, store content label as prediction, if 'real' was predicted,
+    # here, store og content label as prediction, if 'real' was predicted,
     # to get performance per content class
-    y_pred = list()
     gold = [x[1] for x in gold] # content labels
-    for pred, g in zip(real_fake_preds, gold):
-        if pred == 1: #correctly id'd as real img in cifar100
-            y_pred.append(g)
-        else:
-            y_pred.append(-1)
-    # get labels as idx & labels as strin for df later
-    labs = list(set([int(x) for x in gold]))
-    cols = [class_dict[x] if x!=-1 else 'FAKE' 
-            for x in labs]
+    y_pred = [g if pred==1 else -1 for pred, g in zip(binary_preds, gold)]
 
+    # get labels as idx & string for df later
+    labs = list(set([int(x) for x in gold]))
+    cols = [class_dict[x] if x!=-1 else 'FAKE' for x in labs]
+
+    # Score predicitons as if content labels were predicted
     acc = accuracy_score(gold, y_pred)
     rec = recall_score(gold, y_pred, labels=labs, average=None, zero_division=0.0)
-
-    # Add per-class measures & averages
-    eval = pd.DataFrame([rec],
-                        index=["recall"],
-                        columns=cols).transpose()
+    eval = pd.DataFrame([rec], index=["recall"], columns=cols).transpose()
 
     print(f'\nPerformance (n={len(gold)} test imgs, decision threshold={thresh})')
     print(f'Overall accuracy: {acc:.2%}\n', eval, sep='\n')
 
     return acc, eval
 
+
 def test_thresh_size(gold, preds):
     """Calculate and return evaluation metrics for a given set of gold
     labels and predictions for decision threshold values 0.1->0.9.
     """
     data = {}
+    # Get prediction scores for each decision threshold
     for i in range(1, 10):
         thresh = round(i/10, 2)
         data[thresh] = {metric: score_preds(gold, preds, thresh=thresh)[i]
@@ -122,15 +110,19 @@ def test_thresh_size(gold, preds):
         df = pd.DataFrame(data.values(), index=data.keys()).mul(100)
     return df
 
-def visualise(thresh_data_df):
-    fig = thresh_data_df.plot()
+
+def visualise(thresh_data_df, title='Effect of decision threshold size on evaluation metrics'):
+    """Pd df plottin func."""
+    fig = thresh_data_df.plot(ylim=(0,100))
     fig.set_ylabel('Score %')
     fig.set_xlabel('Decision threshold value')
-    fig.title.set_text('Effect of decision threshold size on evaluation metrics')
+    fig.title.set_text(title)
     fig.legend(loc='lower center')
     plt.show()
 
+
 if __name__=='__main__':
+    print('Running...')
     from tqdm import tqdm
     # Fetch test files & get test data
     testfiles = get_files(config['CIFAKE_dir'])['test']

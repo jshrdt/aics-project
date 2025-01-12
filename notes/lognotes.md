@@ -1,6 +1,6 @@
 # Work notes
 
-### Dec11:  
+#### Dec11:  
 GitHub setup; report template/basic notes, dataset references. 
 
 - get/load dataset (Class CIFAKE; sep train/test data, shuffle), batcher  
@@ -8,7 +8,7 @@ GitHub setup; report template/basic notes, dataset references.
 
 TBD: input transform; label encode? - done
 
-### Dec12:  
+#### Dec12:  
 - iterator for batches, filename to normalised tensor transform, label 0/1 encoding. 
 - load, transform, train, test, evaluate functions; first complete run + scores
 - split up code into main notebook, script for classes, script for functions
@@ -42,7 +42,7 @@ F1-Score: 90.01%
 - kernels?; stride=1  
 - pooling  
 - sigmoid  
-- score (tbd across modalities), but overall (p.6) 'all feature extractors scored relatively well without the need for dense layers to process feature maps' avg. classificaiton accuracy of 91.79%  
+- score (tbd across modalities), but overall (p.6) 'all feature extractors scored relatively well without the need for dense layers to process feature maps' avg. classification accuracy of 91.79%  
 
 - XAI: Gradient Class Activation Mapping (Grad-CAM)  
 
@@ -81,6 +81,7 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 
 #### Dec20
 - looking for other possible real vs fake img datasets
+- mltgpu sync
 
 [looking for datasets, formulating plan based on research interest]
 [directions:(cifar100, other fake images, attn heat maps, zero/few shot; dataset bias]
@@ -117,8 +118,18 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 
 - load & transfer mini, base, attn to external mixed real/fake dataset (ai-generated-images-vs-real-images, Tristan Zhang; https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images/data)
 - no high hopes for performance, but intended for paper critique; CIFAKE is not suited for transfer; results in paper also seem 'naive'; their model likely overfits,  "providing not only a system that can recognise synthetic images but also data and interpretation."...well no.
-- " significant contribution is made through the release of the CIFAKE dataset."; contrition to what, exactly
+- " significant contribution is made through the release of the CIFAKE dataset."; contribution to what, exactly
 
 - experimenting with architecture: SRM after conv2d/pooling layers, instead of in-between; initial loss lower?
+
+#### Jan10
+- code fixes, add per-class eval for mixed transfer
+- quick meeting with Maria to discuss final thoughts/what to leave up to future work
+
+#### Jan11
+- paper writing (methods-results), final design/comparison choices 
+
+#### Jan 12
+- paper writing (discussion/conclusion), repos formatting
 
 

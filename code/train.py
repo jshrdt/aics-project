@@ -1,6 +1,5 @@
 # Train script
 # Imports
-print('Running...')
 import argparse
 
 import json
@@ -18,6 +17,7 @@ parser.add_argument('-ep', '--epochs', help='number of epochs to train on',
                     default=5)
 parser.add_argument('-mf', '--modelfile', help='set filename to save model to (in ../models{modelname}.pth)',
                     default=False)
+# add lr, momentum?
 args, unk = parser.parse_known_args()
 
 with open('config.json') as f:
@@ -35,20 +35,21 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
         epochs (int, optional): Number of epochs. Defaults to 5.
         learn_rate (float, optional): Optimizer learn rate. Defaults to 0.001.
         momentum (float, optional): Momentum for optimizer. Defaults to 0.9.
+        log (bool, optional): If true, print current avg loss at 25%
+            increments per epoch. Defaults to False.
 
     Returns:
         CIFAKE_CNN: CNN model for binary image classification
     """
-    # my function, structure base from cifar10_tutorial.ipynb; modified
-    # everthing but the running_loss usage, lr, momentum
+    # structure base from cifar10_tutorial.ipynb; modified
+    # everthing but: running_loss usage, lr, momentum
     criterion = nn.BCELoss()  # match loss for binary classification
     optimizer = optim.SGD(model.parameters(), lr=learn_rate, momentum=momentum)
-    n_batches=len(data)//data.batch_size  # determine nr of batches for pretty tqdm
 
     for epoch in range(epochs):
         total_loss = 0
         running_loss = 0
-        for i, batch in tqdm(enumerate(data), total=n_batches):
+        for i, batch in tqdm(enumerate(data), total=len(data.batches)):
             # reset gradient
             optimizer.zero_grad()
 
@@ -57,7 +58,7 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
             output = model(X)
 
             # calculate & store loss
-            loss = criterion(output, y.reshape(-1,1))  # reshape for single dim
+            loss = criterion(output, y.reshape(-1, 1))  # reshape for single dim
             running_loss += loss.item()
             total_loss += loss.item()
 
@@ -65,13 +66,13 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
             loss.backward()
             optimizer.step()
 
-            # print statistics
-            if log and i % (n_batches//4) == (n_batches//4)-1:
-                print(f'[{epoch+1}, {i+1:5d}] avg loss: {running_loss/(n_batches//4):.3f}',
-                      end='\r')  # kept from class notebook, udpated with n_batches
+            # print current avg loss every quarter epoch
+            if log and i % (len(data.batches)//4) == (len(data.batches)//4)-1:
+                print(f'[{epoch+1}, {i+1:5d}] avg loss: {running_loss/(len(data.batches)//4):.3f}',
+                      end='\r')  # kept from class notebook, udpated with len(data.batches)
                 running_loss = 0.0
 
-        print(f'\repoch: {epoch}\ttotal loss: {total_loss}\tavg loss: {total_loss/n_batches}')
+        print(f'\repoch: {epoch}\ttotal loss: {total_loss}\tavg loss: {total_loss/len(data.batches)}')
 
     print('Finished Training')
 
@@ -79,6 +80,7 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
 
 
 if __name__=='__main__':
+    print('Running...')
     from tqdm import tqdm
     # Get files & create loader
     train_files = get_files(config['CIFAKE_dir'])['train']
