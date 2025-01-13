@@ -20,7 +20,7 @@ parser.add_argument('-mf', '--modelfile', help='set filename to save model to (i
 # add lr, momentum?
 args, unk = parser.parse_known_args()
 
-with open('config.json') as f:
+with open('./config.json') as f:
     config = json.load(f)
 
 
@@ -46,7 +46,7 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
     criterion = nn.BCELoss()  # match loss for binary classification
     optimizer = optim.SGD(model.parameters(), lr=learn_rate, momentum=momentum)
 
-    for epoch in range(epochs):
+    for epoch in range(1, epochs+1):
         total_loss = 0
         running_loss = 0
         for i, batch in tqdm(enumerate(data), total=len(data.batches)):
@@ -68,7 +68,7 @@ def train_model(model: CIFAKE_CNN, data: CI_LOADER, epochs: int = 5,
 
             # print current avg loss every quarter epoch
             if log and i % (len(data.batches)//4) == (len(data.batches)//4)-1:
-                print(f'[{epoch+1}, {i+1:5d}] avg loss: {running_loss/(len(data.batches)//4):.3f}',
+                print(f'[{epoch}, {i+1:5d}] avg loss: {running_loss/(len(data.batches)//4):.3f}',
                       end='\r')  # kept from class notebook, udpated with len(data.batches)
                 running_loss = 0.0
 
@@ -86,11 +86,12 @@ if __name__=='__main__':
     train_files = get_files(config['CIFAKE_dir'])['train']
     traindata = CI_LOADER(train_files, batch_size=int(args.batch_size))
     # Initiate & train model
-    model = CIFAKE_CNN()
-    model = train_model(model, traindata, epochs=int(args.epochs))
+    new_model = CIFAKE_CNN()
+    trained_model = train_model(new_model, traindata, epochs=int(args.epochs))
 
     # Optional: save to file
     if args.modelfile:
-        torch.save(model.state_dict(), f"../models/{args.modelfile}.pth")
-        print('Model saved to', f"../models/{args.modelfile}.pth")
+        fname = f"../models/{args.modelfile}.pth"
+        torch.save(trained_model.state_dict(), fname)
+        print('Model saved to', fname)
     print('\n-- Finished --')

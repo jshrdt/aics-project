@@ -132,4 +132,8 @@ Slower to train (in terms of loss progression), but 5 epochs already reaching 89
 #### Jan 12
 - paper writing (discussion/conclusion), repos formatting
 
+#### Jan 13
+- final proofreading, adding project outline md
+- script testing: tiny code fix for loading final batches
+
 

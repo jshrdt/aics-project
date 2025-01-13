@@ -64,7 +64,7 @@ class CI_LOADER():
     def batcher(self):
         batches = list()
         random.Random(11).shuffle(self.data)  # only seed overall batches
-        for i in range(len(self)//self.batch_size+1):
+        for i in range(len(self)//self.batch_size+(1 if len(self)%self.batch_size else 0)):
             # slice data & shuffle item tuples in batch.
             start = self.batch_size*i
             stop = self.batch_size*(i+1)
@@ -72,8 +72,8 @@ class CI_LOADER():
             # Transform image files to normalised tensor matrix,
             # binary encode & torch stack classes in parallel (FAKE-0).
             try: # sometimes fails on Zhang transfer data set
-                batch = (torch.stack([self.trans_img(item[0]) for item in batch]).to(self.device),
-                        torch.stack([self.trans_label(item[1]) for item in batch]).to(self.device))
+                batch = (torch.stack([self.trans_img(item[0]) for item in batch]),
+                        torch.stack([self.trans_label(item[1]) for item in batch]))
                 batches.append(batch)
             except:
                 if self.source == 'Zhang':

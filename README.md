@@ -6,30 +6,20 @@ An exploration of ML for the detection of AI-generated images which imitate phot
 Required datasets, to be placed in code/:  
 CIFAKE https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images/data  
 CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data  
-ai-generated-images-vs-real-images/test: https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images (only the test dir!)
+ai-generated-images-vs-real-images/test: https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images (only the test dir!, but include the 'ai-generated-images-vs-real-images' folder for path structure)
+
+MLT-GPU path: /srv/data/gussucju/aics-project  
+However, I had trouble uploading the datasets & found different info re whether to supply or just link these. Since my main datasets (CIFAKE, CIFAR100) are pretty small & training is quick, I opted to give download instructions for these. AGIRI is the only larger dataset, let me know if I should supply these in some other way.
 
 ___
 
 #### Quickstart:
-* pretrained model files are stored in models/
-* go to code/CIFAKE_classification.ipynb or code/func_difficulty.ipynb for training/testing on CIFAKE  
-* then to transfer_cifar100.ipynb or transfer_mixed.ipynb to load & apply models on CIFAR100/AGIRI
+
+* Download the required datasets as noted above, place in code/
+* (pretrained model files are stored in models/; for training of new models follow the next two bulletpoints in order)
+* Go to code/CIFAKE_classification.ipynb or code/func_difficulty.ipynb for training/testing on CIFAKE  
+* Go to transfer_cifar100.ipynb or transfer_mixed.ipynb to load & apply models on CIFAR100/AGIRI
   
-
-Models can also be trained/tested from the cmd line, but this is not necessarily for the notebooks/analysis; they be stored in & loaded from models/
-
-For the cmd line scripts train.py & test.py (described in below under code/), from aics-project/code, call e.g.:
-> $ python3 train.py -ep1 -mf dummymodel  
-> $ python3 test.py -mf dummymodel
-
-___
-
-a general description of the project which should include:  
-
-(i) what information can be found in other folders  
-(ii) instructions how to run your system, what other componenets/datasets are required and where they can be obtained  
-(iii) general work plan of the projects and a place to leave our comments. This is also the first file we will look at.  
-
 ___
 
 ## Repos breakdown:
@@ -56,20 +46,20 @@ code/: all code should go in this folder. For coding we recommend using Jupyter 
 #### classes.py  
 OOP classes for...  
 * CI_loader: data batching, transformation, encoding; used for CIFAKE & CIFAR100
-* CIFAKE_CNN: Model architecture based on cifar10_tutorial.ipynb, modified for binary classification
-* SRMLayer: Style-recalibration module channel attention layer (https://blog.paperspace.com/srm-channel-attention/)
+* CIFAKE_CNN: Model architecture based on course tutorial notebook supervised/cifar10_tutorial.ipynb (https://canvas.gu.se/files/9275057/), modified for binary classification
+* SRMLayer: Style-recalibration module channel attention layer (https://blog.paperspace.com/srm-channel-attention/, detailed sources in code+paper)
 
 #### train.py
 * Script to train models on CIFAKE
 * cmd line args: batch size (bs; 32), epochs (ep; 5), modelfile (mf; only save model if passed; format: '../models/{args.modelfile}.pth'  
-Example call:  
-> $ python3 train.py -ep1 -mf dummymodel
+Example call, from code/:  
+> $ python3 code/train.py -ep 1 -mf dummymodel
 
 #### test.py
 * Script to test & evaluate model on CIFAKE, CIFAR100 test data, includes eval functions used in notebooks
 * cmd line args: modelfile (mf; model to test from '../models/{args.modelfile}.pth', default: base_model), decision_threshold (thr; 0.5)  
-Example call:  
-> $ python3 test.py -thr 0.4
+Example call, from code/:  
+> $ python3 code/test.py -thr 0.4
 
 #### config.json
 * simple json file to keep track of some filenames; I.e. CIFAKE dir, base/attention/mini model paths
@@ -80,6 +70,7 @@ data/: use this folder for datasets that you have created. Those that can be dow
 
 * (CIFAKE should be placed in here)
 * (CIFAR100 should be placed in here)
+* (ai-generated-images-vs-real-images (AGIRI) should be placed in here, but we only need the /test folder therein)
 
 ____
 
@@ -108,6 +99,12 @@ notes/: To show the work that you have done (especially important if you get a n
 #### lognotes.md
 * work progress diary (messy, personal use)
 
+#### project_pitch_og.md
+* copy of original project pitch (LT2318_AICS_project_pitch.pdf) as markdown file
+
+#### project_outline.md
+* updated, short overview of project steps
+
 ____
 
 paper/: a place for your course report and presentation
@@ -116,7 +113,7 @@ paper/: a place for your course report and presentation
 * original project pitch; proposed project steps
 * updated on canvas discussion thread
 
-#### aics_report_v01.pdf
+#### aics_report.pdf
 * project paper
 
 #### aics_ppp.pptx

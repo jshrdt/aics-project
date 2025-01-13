@@ -20,7 +20,7 @@ parser.add_argument('-thr', '--decision_thresh', help='set decision threshold fo
 
 args, unk = parser.parse_known_args()
 
-with open('config.json') as f:
+with open('./config.json') as f:
     config = json.load(f)
 
 
@@ -125,8 +125,7 @@ if __name__=='__main__':
     print('Running...')
     from tqdm import tqdm
     # Fetch test files & get test data
-    testfiles = get_files(config['CIFAKE_dir'])['test']
-    testdata = CI_LOADER(testfiles, batch_size=32)
+    testdata = CI_LOADER(get_files(config['CIFAKE_dir'])['test'])
     # Load the model to test
     model = CIFAKE_CNN()
     model.load_state_dict(torch.load(f"../models/{args.modelfile}.pth"))
