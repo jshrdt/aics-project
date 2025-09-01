@@ -9,7 +9,6 @@ CIFAR100: https://www.kaggle.com/datasets/fedesoriano/cifar100/data
 ai-generated-images-vs-real-images/test: https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images (only the test dir!, but include the 'ai-generated-images-vs-real-images' folder for path structure)
 
 MLT-GPU path: /srv/data/gussucju/aics-project  
-However, I had trouble uploading the datasets & found different info re whether to supply or just link these. Since my main datasets (CIFAKE, CIFAR100) are pretty small & training is quick, I opted to give download instructions for these. AGIRI is the only larger dataset, let me know if I should supply these in some other way.
 
 ___
 
